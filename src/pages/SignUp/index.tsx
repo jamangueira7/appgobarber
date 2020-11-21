@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { Form } from  '@unform/mobile';
 import { FormHandles } from  '@unform/core';
 import * as Yup from 'yup';
+import api from '../../services/api';
 
 import getValidationErrors from '../../utils/getValidationErrors';
 import Input from '../../components/Input';
@@ -60,9 +61,14 @@ const SignUp: React.FC = () => {
                 abortEarly: false,
             });
 
-            //await api.post('/users', data);
+            await api.post('/users', data);
 
-            //history.push('/');
+            Alert.alert(
+                'Cadastro realizado com sucesso!',
+                'Você já pode fazer login na aplicação.',
+            );
+
+            navigation.navigate('SignIn');
 
         } catch (err) {
 
@@ -72,12 +78,13 @@ const SignUp: React.FC = () => {
                 return;
             }
 
+            console.log(err)
             Alert.alert(
                 'Erro no cadastro',
                 'Ocorreu um erro ao fazer cadastro, tente novamente.',
             );
         }
-    }, []);
+    }, [navigation]);
 
     return(
         <>
@@ -131,14 +138,14 @@ const SignUp: React.FC = () => {
                                     formRef.current?.submitForm();
                                 }}
                             />
-                            <Button
-                                onPress={() => {
-                                    formRef.current?.submitForm();
-                                }}
-                            >
-                                Entrar
-                            </Button>
                         </Form>
+                        <Button
+                            onPress={() => {
+                                formRef.current?.submitForm();
+                            }}
+                        >
+                            Entrar
+                        </Button>
                     </Container>
                 </ScrollView>
             </KeyboardAvoidingView>
