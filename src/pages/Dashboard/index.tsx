@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 
-import api from '../../services/api';
-
-import { useNavigation } from '@react-navigation/native';
 import { UseAuth } from '../../hooks/auth';
+import api from '../../services/api';
 
 import {
     Container,
@@ -55,7 +54,6 @@ const Dashboard: React.FC = () => {
                     Bem vindo, {"\n"}
                     <UserName>{user.name}</UserName>
                 </HeaderTitle>
-
                 <ProfileButton onPress={navigateToProfile}>
                     <UserAvatar source={{ uri: user.avatar_url }} />
                 </ProfileButton>
