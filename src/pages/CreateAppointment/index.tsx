@@ -7,7 +7,7 @@ import React,
 } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 
@@ -37,6 +37,8 @@ import {
     SectionContent,
     Hour,
     HourText,
+    CreateAppointmentButton,
+    CreateAppointmentButtonText,
 } from './styles';
 
 interface RouteParams {
@@ -64,7 +66,7 @@ const CreateAppointment: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedHour, setSelectedHour] = useState(0);
     const [selectedProvider, setSelectedProvider] = useState(routeParams.providerId);
-    const { goBack } = useNavigation();
+    const { goBack, navigate } = useNavigation();
 
     useEffect(() => {
         api.get('providers').then((response) => {
@@ -136,6 +138,28 @@ const CreateAppointment: React.FC = () => {
     const handleSelectHour = useCallback((hour: number) => {
         setSelectedHour(hour);
     }, []);
+
+    const handleCreateAppointment = useCallback(async () => {
+        try {
+            const date = new Date(selectedDate);
+            date.setHours(selectedHour);
+            date.setMinutes(0);
+            const month = date.getMonth()+1;
+            const dateFormatted = date.getFullYear()+'-'+month+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes();
+            
+            await api.post('appointments', {
+                provider_id: selectedProvider,
+                date: dateFormatted,
+            });
+
+            navigate('AppointmentCreated', { date: date.getTime() });
+        } catch (err) {
+            Alert.alert(
+              'Erro ao criar agendamento',
+              'Ocorreu um erro ao tentar criar um agendamento, tente novamente.',
+            );
+        }
+    }, [navigate, selectedProvider, selectedHour, selectedDate]);
 
     return (
         <Container>
@@ -221,6 +245,9 @@ const CreateAppointment: React.FC = () => {
                         </SectionContent>
                     </Section>
                 </Schedule>
+                <CreateAppointmentButton onPress={handleCreateAppointment}>
+                    <CreateAppointmentButtonText>Agendar</CreateAppointmentButtonText>
+                </CreateAppointmentButton>
             </Content>
         </Container>
     );
