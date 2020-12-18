@@ -146,7 +146,7 @@ const CreateAppointment: React.FC = () => {
             date.setMinutes(0);
             const month = date.getMonth()+1;
             const dateFormatted = date.getFullYear()+'-'+month+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes();
-            
+
             await api.post('appointments', {
                 provider_id: selectedProvider,
                 date: dateFormatted,
