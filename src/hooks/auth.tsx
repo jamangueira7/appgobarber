@@ -31,6 +31,7 @@ interface AuthContextData {
   loading: boolean;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
+  updateUser(user: User): Promise<void>;
 }
 
 const Auth = createContext<AuthContextData>({} as AuthContextData);
@@ -41,17 +42,20 @@ const AuthProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     async function loadStorageData(): Promise<void> {
-      const [token, user] = await AsyncStorage.multiGet([
-          '@Gobarber:token',
-          '@Gobarber:user',
-      ]);
+      try {
+        const [token, user] = await AsyncStorage.multiGet([
+            '@Gobarber:token',
+            '@Gobarber:user',
+        ]);
 
-      if(token[1] && user[1]) {
-        api.defaults.headers.authorization = `Bearer ${token[1]}`;
+        if(token[1] && user[1]) {
+          api.defaults.headers.authorization = `Bearer ${token[1]}`;
 
-        setData({ token: token[1], user: JSON.parse(user[1]) });
+          setData({ token: token[1], user: JSON.parse(user[1]) });
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     loadStorageData();
@@ -67,7 +71,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
     await AsyncStorage.multiSet([
         ['@Gobarber:token', token],
-        ['@Gobarber:user', JSON.stringify(user)]
+        ['@Gobarber:user', JSON.stringify(user)],
     ]);
 
     api.defaults.headers.authorization = `Bearer ${token}`;
@@ -78,11 +82,23 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const signOut = useCallback(async () => {
     await AsyncStorage.multiRemove(['@Gobarber:token', '@Gobarber:user']);
+
     setData({} as AuthState);
   }, []);
 
+  const updateUser = useCallback(async (user: User) => {
+    await AsyncStorage.setItem('@Gobarber:user', JSON.stringify(user));
+
+    setData({
+      token: data.token,
+      user,
+    });
+  }, [setData, data.token]);
+
   return (
-    <Auth.Provider value={{ user: data.user, loading, signIn, signOut }}>
+    <Auth.Provider
+        value={{ user: data.user, loading, signIn, signOut, updateUser }}
+    >
       {children}
     </Auth.Provider>
   );

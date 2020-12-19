@@ -1,6 +1,5 @@
 import React, { useCallback, useRef } from 'react';
 import {
-    Image,
     View,
     ScrollView,
     KeyboardAvoidingView,
@@ -9,16 +8,17 @@ import {
     Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Feather';
 import { Form } from  '@unform/mobile';
 import { FormHandles } from  '@unform/core';
 import * as Yup from 'yup';
-import api from '../../services/api';
 
 import { UseAuth } from '../../hooks/auth';
-import getValidationErrors from '../../utils/getValidationErrors';
-import Input from '../../components/Input';
+import api from '../../services/api';
 
+import Icon from 'react-native-vector-icons/Feather';
+import getValidationErrors from '../../utils/getValidationErrors';
+
+import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import {
@@ -32,25 +32,26 @@ import {
 interface ProfileFormData {
     name: string;
     email: string;
-    password: string;
     old_password: string;
+    password: string;
     password_confirmation: string;
 }
 
 const Profile: React.FC = () => {
-    const { user } = UseAuth();
     const formRef = useRef<FormHandles>(null);
-    const navigation = useNavigation();
-
     const emailInputRef = useRef<TextInput>(null);
     const oldPasswordInputRef = useRef<TextInput>(null);
-    const confirmPasswordInputRef = useRef<TextInput>(null);
     const passwordInputRef = useRef<TextInput>(null);
+    const passwordConfirmationInputRef = useRef<TextInput>(null);
 
-    const handleSignUp = useCallback(async (data: ProfileFormData) => {
+    const navigation = useNavigation();
+    const { user, updateUser } = UseAuth();
+
+    const handleSaveProfile = useCallback(async (data: ProfileFormData) => {
 
         try {
             formRef.current?.setErrors({});
+
             const schema = Yup.object().shape({
 
                 name: Yup.string()
@@ -93,6 +94,8 @@ const Profile: React.FC = () => {
 
             const response = await api.put('/profile', formData);
 
+            await updateUser(response.data);
+
             Alert.alert('Perfil atualizado com sucesso!');
 
             navigation.goBack();
@@ -108,12 +111,12 @@ const Profile: React.FC = () => {
             console.log(err)
             Alert.alert(
                 'Erro na atualização do perfil',
-                'Ocorreu um erro ao fazer cadastro, tente novamente.',
+                'Ocorreu um erro ao atualizar seu perfil, tente novamente.',
             );
         }
-    }, [navigation]);
+    }, [navigation, updateUser]);
 
-    const handleGoBack = useCallback(async () => {
+    const handleGoBack = useCallback(() => {
         navigation.goBack();
     }, [navigation]);
 
@@ -136,19 +139,26 @@ const Profile: React.FC = () => {
                         <UserAvatarButton onPress={() => {}}>
                             <UserAvatar source={{ uri: user.avatar_url }} />
                         </UserAvatarButton>
+
                         <View>
                             <Title>Meu perfil</Title>
                         </View>
-                        <Form ref={formRef} onSubmit={handleSignUp}>
+
+                        <Form
+                            ref={formRef}
+                            initialData={{
+                                name: user.name,
+                                email: user.email,
+                            }}
+                            onSubmit={handleSaveProfile}
+                        >
                             <Input
                                 autoCapitalize="words"
                                 name="name"
                                 icon="user"
                                 placeholder="Nome"
                                 returnKeyType="next"
-                                onSubmitEditing={() => {
-                                    emailInputRef.current?.focus();
-                                }}
+                                onSubmitEditing={() => emailInputRef.current?.focus()}
                             />
                             <Input
                                 ref={emailInputRef}
@@ -159,9 +169,7 @@ const Profile: React.FC = () => {
                                 icon="mail"
                                 placeholder="E-mail"
                                 returnKeyType="next"
-                                onSubmitEditing={() => {
-                                    oldPasswordInputRef.current?.focus();
-                                }}
+                                onSubmitEditing={() => oldPasswordInputRef.current?.focus()}
                             />
                             <Input
                                 ref={oldPasswordInputRef}
@@ -172,9 +180,7 @@ const Profile: React.FC = () => {
                                 textContentType="newPassword"
                                 containerStyle={{ marginTop: 16 }}
                                 returnKeyType="next"
-                                onSubmitEditing={() => {
-                                    passwordInputRef.current?.submitForm();
-                                }}
+                                onSubmitEditing={() => passwordInputRef.current?.submitForm()}
                             />
                             <Input
                                 ref={passwordInputRef}
@@ -184,28 +190,20 @@ const Profile: React.FC = () => {
                                 secureTextEntry
                                 textContentType="newPassword"
                                 returnKeyType="next"
-                                onSubmitEditing={() => {
-                                    confirmPasswordInputRef.current?.submitForm();
-                                }}
+                                onSubmitEditing={() => passwordConfirmationInputRef.current?.submitForm()}
                             />
                             <Input
-                                ref={confirmPasswordInputRef}
+                                ref={passwordConfirmationInputRef}
                                 name="password_confirmation"
                                 icon="lock"
                                 placeholder="Confirmar senha"
                                 secureTextEntry
                                 textContentType="newPassword"
                                 returnKeyType="send"
-                                onSubmitEditing={() => {
-                                    formRef.current?.submitForm();
-                                }}
+                                onSubmitEditing={() => formRef.current?.submitForm()}
                             />
                         </Form>
-                        <Button
-                            onPress={() => {
-                                formRef.current?.submitForm();
-                            }}
-                        >
+                        <Button onPress={() => formRef.current?.submitForm()}>
                             Confirmar mudanças
                         </Button>
                     </Container>

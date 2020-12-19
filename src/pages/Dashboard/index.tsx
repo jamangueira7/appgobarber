@@ -51,12 +51,14 @@ const Dashboard: React.FC = () => {
         <Container>
             <Header>
                 <HeaderTitle>
-                    Bem vindo, {"\n"}
+                    Bem vindo, {'\n'}
                     <UserName>{user.name}</UserName>
                 </HeaderTitle>
+
                 <ProfileButton onPress={navigateToProfile}>
                     <UserAvatar source={{ uri: user.avatar_url }} />
                 </ProfileButton>
+
             </Header>
             <ProvidersList
                 data={providers}
