@@ -11,11 +11,11 @@ import { useNavigation } from '@react-navigation/native';
 import { Form } from  '@unform/mobile';
 import { FormHandles } from  '@unform/core';
 import * as Yup from 'yup';
+import Icon from 'react-native-vector-icons/Feather';
+import ImagePicker from 'react-native-image-picker';
 
 import { UseAuth } from '../../hooks/auth';
 import api from '../../services/api';
-
-import Icon from 'react-native-vector-icons/Feather';
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import Input from '../../components/Input';
@@ -116,6 +116,28 @@ const Profile: React.FC = () => {
         }
     }, [navigation, updateUser]);
 
+    const handleUpdateAvatar = useCallback( () => {
+        ImagePicker.showImagePicker(
+            {
+                title: 'Selecione um avatar',
+                cancelButtonTitle: 'Cancelar',
+                takePhotoButtonTitle: 'Usar Câmera',
+                chooseFromLibraryButtonTitle: 'Escolha da galeria',
+            }, (response) => {
+
+            if (response.didCancel) {
+                return;
+            }
+
+            if (response.error) {
+                Alert.alert('Erro ao atualizar seu avatar.');
+                return;
+            }
+
+            const source = { uri: response.uri };
+        });
+    }, []);
+
     const handleGoBack = useCallback(() => {
         navigation.goBack();
     }, [navigation]);
@@ -136,7 +158,7 @@ const Profile: React.FC = () => {
                             <Icon name="chevron-left" size={24} color="#999591" />
                         </BackButton>
 
-                        <UserAvatarButton onPress={() => {}}>
+                        <UserAvatarButton onPress={handleUpdateAvatar}>
                             <UserAvatar source={{ uri: user.avatar_url }} />
                         </UserAvatarButton>
 
@@ -158,7 +180,9 @@ const Profile: React.FC = () => {
                                 icon="user"
                                 placeholder="Nome"
                                 returnKeyType="next"
-                                onSubmitEditing={() => emailInputRef.current?.focus()}
+                                onSubmitEditing={() => {
+                                    emailInputRef.current?.focus();
+                                }}
                             />
                             <Input
                                 ref={emailInputRef}
@@ -169,7 +193,9 @@ const Profile: React.FC = () => {
                                 icon="mail"
                                 placeholder="E-mail"
                                 returnKeyType="next"
-                                onSubmitEditing={() => oldPasswordInputRef.current?.focus()}
+                                onSubmitEditing={() => {
+                                    oldPasswordInputRef.current?.focus();
+                                }}
                             />
                             <Input
                                 ref={oldPasswordInputRef}
@@ -180,7 +206,9 @@ const Profile: React.FC = () => {
                                 textContentType="newPassword"
                                 containerStyle={{ marginTop: 16 }}
                                 returnKeyType="next"
-                                onSubmitEditing={() => passwordInputRef.current?.submitForm()}
+                                onSubmitEditing={() => {
+                                    passwordInputRef.current?.submitForm();
+                                }}
                             />
                             <Input
                                 ref={passwordInputRef}
@@ -190,7 +218,9 @@ const Profile: React.FC = () => {
                                 secureTextEntry
                                 textContentType="newPassword"
                                 returnKeyType="next"
-                                onSubmitEditing={() => passwordConfirmationInputRef.current?.submitForm()}
+                                onSubmitEditing={() => {
+                                    passwordConfirmationInputRef.current?.submitForm();
+                                }}
                             />
                             <Input
                                 ref={passwordConfirmationInputRef}
@@ -200,10 +230,14 @@ const Profile: React.FC = () => {
                                 secureTextEntry
                                 textContentType="newPassword"
                                 returnKeyType="send"
-                                onSubmitEditing={() => formRef.current?.submitForm()}
+                                onSubmitEditing={() => {
+                                    formRef.current?.submitForm();
+                                }}
                             />
                         </Form>
-                        <Button onPress={() => formRef.current?.submitForm()}>
+                        <Button onPress={() => {
+                            formRef.current?.submitForm();
+                        }}>
                             Confirmar mudanças
                         </Button>
                     </Container>

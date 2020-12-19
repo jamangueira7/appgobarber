@@ -76,7 +76,7 @@ const Input: React.RefForwardingComponent<InputRef, InputProps> = ({ name, icon,
                 ref={inputElementRef}
                 keyboardAppearance="dark"
                 placeholderTextColor="#666360"
-                defautValeu={defaultValue}
+                defaultValue={defaultValue}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
                 onChangeText={(value) => {
