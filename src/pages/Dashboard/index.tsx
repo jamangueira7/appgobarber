@@ -47,6 +47,10 @@ const Dashboard: React.FC = () => {
         navigate('CreateAppointment', { providerId });
     }, [navigate]);
 
+    const handlerLogout = useCallback((providerId: string) => {
+        signOut();
+    }, [signOut]);
+
     return (
         <Container>
             <Header>
@@ -54,7 +58,7 @@ const Dashboard: React.FC = () => {
                     Bem vindo, {'\n'}
                     <UserName>{user.name}</UserName>
                 </HeaderTitle>
-
+                <Icon name="log-out" size={14} color="#ff9000" onPress={handlerLogout} />
                 <ProfileButton onPress={navigateToProfile}>
                     <UserAvatar source={{ uri: user.avatar_url }} />
                 </ProfileButton>
@@ -69,7 +73,6 @@ const Dashboard: React.FC = () => {
                 renderItem={({ item: provider }) => (
                     <ProviderContainer onPress={() => navigateToCreateAppointment(provider.id)}>
                         <ProviderAvatar source={{ uri: provider.avatar_url }} />
-
                         <ProviderInfo>
                             <ProviderName>{provider.name}</ProviderName>
                             <ProviderMeta>
